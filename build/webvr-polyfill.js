@@ -255,11 +255,18 @@ module.exports = GyroPositionSensorVRDevice;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-var WebVRPolyfill = require('./webvr-polyfill.js');
 
-new WebVRPolyfill();
+// CM: we will create our own polyfill instance
+//var WebVRPolyfill = require('./webvr-polyfill.js');
+//
+// new WebVRPolyfill();
 
-},{"./webvr-polyfill.js":10}],5:[function(require,module,exports){
+
+var WebVRPolyfill = require('./webvr-polyfill-overrides.js');
+window.VR = window.VR || {};
+window.VR.webVRPolyfill = new WebVRPolyfill();
+
+},{"./webvr-polyfill-overrides.js":10}],5:[function(require,module,exports){
 /*
  * Copyright 2015 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -3094,6 +3101,133 @@ Util.mapRange = function(value, minDomain, maxDomain, minRange, maxRange) {
 module.exports = Util;
 
 },{}],10:[function(require,module,exports){
+/*
+ * Cargo Media patch:
+ * - force polyfill usage
+ * - allow to pass custom VRDevice
+ * - override native `VRDevice` if necessary (see getVRDevices() doc for more details)
+ */
+
+var WebVRPolyfill = require('./webvr-polyfill.js');
+
+var VRDevice = require('./base.js').VRDevice;
+var HMDVRDevice = require('./base.js').HMDVRDevice;
+var PositionSensorVRDevice = require('./base.js').PositionSensorVRDevice;
+
+var CardboardHMDVRDevice = require('./cardboard-hmd-vr-device.js');
+var GyroPositionSensorVRDevice = require('./gyro-position-sensor-vr-device.js');
+var MouseKeyboardPositionSensorVRDevice = require('./mouse-keyboard-position-sensor-vr-device.js');
+
+
+/**
+ * @param {VRDevice[]} defaultDevices
+ * @constructor
+ * @extends {WebVRPolyfill}
+ */
+var WebVRPolyfillExtended = function(defaultDevices) {
+  this.devices = [];
+  this._defaultDevices = defaultDevices;
+  this.enablePolyfill();
+};
+
+WebVRPolyfillExtended.prototype = Object.create(WebVRPolyfill.prototype);
+WebVRPolyfillExtended.prototype.constructor = WebVRPolyfillExtended;
+
+WebVRPolyfillExtended.prototype.enablePolyfill = function() {
+
+  this._getVRDevicesPromise = this.isWebVRAvailable() ? navigator.getVRDevices() : Promise.resolve([]);
+
+  // Provide navigator.getVRDevices.
+  navigator.getVRDevices = this.getVRDevices.bind(this);
+
+  // Provide the CardboardHMDVRDevice and PositionSensorVRDevice objects.
+  window.VRDevice = VRDevice;
+  window.HMDVRDevice = HMDVRDevice;
+
+  // Override native PositionSensorVRDevice if needed
+  window.PositionSensorVRDevice = window.PositionSensorVRDevice || PositionSensorVRDevice;
+};
+
+
+/**
+ * @param {VRDevice[]|VRDevice} devices
+ */
+WebVRPolyfillExtended.prototype.addDefaultDevices = function(devices) {
+  devices = devices.constructor === Array ? devices : [devices];
+  this._defaultDevices = this._defaultDevices.concat(devices);
+};
+
+/**
+ * @returns {VRDevice|undefined}
+ */
+WebVRPolyfillExtended.prototype.getDefaultVRDeviceByHardwareUnitId = function() {
+  var devices = this._defaultDevices;
+  for (i = 0; i < devices.length; i++) {
+    if (devices[i].hardwareUnitId === hardwareUnitId) {
+      return devices[i];
+    }
+  }
+};
+
+/**
+ * @returns {Promise}
+ */
+WebVRPolyfillExtended.prototype.getVRDevices = function() {
+  return this._getVRDevicesPromise.then(this._processVRDevices.bind(this));
+};
+
+/**
+ * mix native/polyfill VRDevices:
+ * - use native PositionSensorVRDevice if available
+ * - use default polyfill HMDVRDevice if a corresponding native HMDVRDevice is available
+ *
+ * if there's no native VRDevice, use a simulated PositionSensorVRDevice and a default CardboardHMDVRDevice
+ *
+ * @returns VRDevice[]
+ */
+WebVRPolyfillExtended.prototype._processVRDevices = function(nativeDevices) {
+
+  var deviceByType = function(deviceList, InstanceType) {
+    for (i = 0; i < deviceList.length; i++) {
+      if (deviceList[i] instanceof InstanceType) {
+        return deviceList[i];
+      }
+    }
+  };
+
+  var polyfillDevices = [], i, nativeDevice, device;
+
+  for (i = 0; i < nativeDevices.length; i++) {
+    nativeDevice = nativeDevices[i];
+    device = this.getDefaultVRDeviceByHardwareUnitId(nativeDevice.hardwareUnitId);
+
+    if (nativeDevice instanceof PositionSensorVRDevice) {
+      polyfillDevices.push(nativeDevice);
+    }
+    if (device instanceof HMDVRDevice) {
+      polyfillDevices.push(device);
+    }
+  }
+
+  if(!(deviceByType(polyfillDevices, PositionSensorVRDevice))){
+    if (this.isMobile()) {
+      polyfillDevices.push(new GyroPositionSensorVRDevice());
+    } else {
+      polyfillDevices.push(new MouseKeyboardPositionSensorVRDevice());
+    }
+  }
+
+  if(!(deviceByType(polyfillDevices, HMDVRDevice))){
+    polyfillDevices.push(new CardboardHMDVRDevice());
+  }
+
+  this.devices = polyfillDevices;
+  return this.devices;
+};
+
+module.exports = WebVRPolyfillExtended;
+
+},{"./base.js":1,"./cardboard-hmd-vr-device.js":2,"./gyro-position-sensor-vr-device.js":3,"./mouse-keyboard-position-sensor-vr-device.js":5,"./webvr-polyfill.js":11}],11:[function(require,module,exports){
 /*
  * Copyright 2015 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
