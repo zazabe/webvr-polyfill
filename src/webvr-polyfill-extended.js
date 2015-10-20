@@ -27,7 +27,11 @@ var WebVRPolyfillExtended = function(defaultDevices) {
   this.enablePolyfill();
 };
 
-WebVRPolyfillExtended.prototype = Object.create(WebVRPolyfill.prototype);
+WebVRPolyfillExtended.prototype = {
+
+};
+
+
 WebVRPolyfillExtended.prototype.constructor = WebVRPolyfillExtended;
 
 WebVRPolyfillExtended.prototype.enablePolyfill = function() {
@@ -120,6 +124,27 @@ WebVRPolyfillExtended.prototype._processVRDevices = function(nativeDevices) {
 
   this.devices = polyfillDevices;
   return this.devices;
+};
+
+
+
+WebVRPolyfill.prototype.isWebVRAvailable = function() {
+  return ('getVRDevices' in navigator) || ('mozGetVRDevices' in navigator);
+};
+
+
+/**
+ * Determine if a device is mobile.
+ */
+WebVRPolyfill.prototype.isMobile = function() {
+  return /Android/i.test(navigator.userAgent) ||
+    /iPhone|iPad|iPod/i.test(navigator.userAgent);
+};
+
+WebVRPolyfill.prototype.isCardboardCompatible = function() {
+  // For now, support all iOS and Android devices.
+  // Also enable the global CARDBOARD_DEBUG flag.
+  return this.isMobile() || window.CARDBOARD_DEBUG;
 };
 
 module.exports = WebVRPolyfillExtended;
