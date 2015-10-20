@@ -1,10 +1,10 @@
-var VRDevice = require('./base.js').VRDevice;
-var HMDVRDevice = require('./base.js').HMDVRDevice;
-var PositionSensorVRDevice = require('./base.js').PositionSensorVRDevice;
+var VRDevice = require('./VRDevice.js');
+var HMDVRDevice = require('./HMDVRDevice.js');
+var CardboardHMDVRDevice = require('./CardboardHMDVRDevice.js');
 
-var CardboardHMDVRDevice = require('./cardboard-hmd-vr-device.js');
-var GyroPositionSensorVRDevice = require('./gyro-position-sensor-vr-device.js');
-var MouseKeyboardPositionSensorVRDevice = require('./mouse-keyboard-position-sensor-vr-device.js');
+var PositionSensorVRDevice = require('../base.js').PositionSensorVRDevice;
+var GyroPositionSensorVRDevice = require('../gyro-position-sensor-vr-device.js');
+var MouseKeyboardPositionSensorVRDevice = require('../mouse-keyboard-position-sensor-vr-device.js');
 
 
 /**

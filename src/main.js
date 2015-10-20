@@ -19,6 +19,6 @@
 // new WebVRPolyfill();
 
 
-var WebVRPolyfill = require('./webvr-polyfill-extended.js');
+var WebVRPolyfill = require('./cm/Polyfill.js');
 window.VR = window.VR || {};
 window.VR.webVRPolyfill = new WebVRPolyfill();
