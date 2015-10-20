@@ -14,7 +14,6 @@
  */
 var PositionSensorVRDevice = require('./base.js').PositionSensorVRDevice;
 var PosePredictor = require('./pose-predictor.js');
-var THREE = require('./three-math.js');
 var TouchPanner = require('./touch-panner.js');
 var Util = require('./util.js');
 

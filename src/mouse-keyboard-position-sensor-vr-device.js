@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 var PositionSensorVRDevice = require('./base.js').PositionSensorVRDevice;
-var THREE = require('./three-math.js');
 var Util = require('./util.js');
 
 // How much to rotate per key stroke.

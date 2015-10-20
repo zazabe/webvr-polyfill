@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-var THREE = require('./three-math.js');
 
 var ROTATE_SPEED = 0.5;
 /**
