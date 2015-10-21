@@ -15,7 +15,6 @@
 
 var PositionSensorVRDevice = require('./base.js').PositionSensorVRDevice;
 var headtrackr = require('./deps/headtrackr.js');
-var THREE = require('./three-math.js');
 
 // What's the range of the position changes? Use 1m for now.
 var X_SCALE = 2;

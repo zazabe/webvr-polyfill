@@ -14,7 +14,6 @@
  */
 var PositionSensorVRDevice = require('./base.js').PositionSensorVRDevice;
 var PosePredictor = require('./pose-predictor.js');
-var THREE = require('./three-math.js');
 var TouchPanner = require('./touch-panner.js');
 var Util = require('./util.js');
 
@@ -33,7 +32,7 @@ function GyroPositionSensorVRDevice() {
   window.addEventListener('orientationchange', this.onScreenOrientationChange_.bind(this));
 
   this.deviceOrientation = null;
-  this.screenOrientation = window.orientation;
+  this.screenOrientation = window.orientation.angle;
 
   // Helper objects for calculating orientation.
   this.finalQuaternion = new THREE.Quaternion();
@@ -76,7 +75,7 @@ GyroPositionSensorVRDevice.prototype.onDeviceMotionChange_ =
 
 GyroPositionSensorVRDevice.prototype.onScreenOrientationChange_ =
     function(screenOrientation) {
-  this.screenOrientation = window.orientation;
+  this.screenOrientation = window.orientation.angle;
 };
 
 GyroPositionSensorVRDevice.prototype.getOrientation = function() {
