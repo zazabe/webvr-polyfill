@@ -42,7 +42,7 @@ WebVRPolyfillExtended.prototype = {
    * @param {VRDevice} device
    */
   setDefaultDevice: function(device) {
-    if(!(device instanceof HMDVRDevice)){
+    if (!(device instanceof HMDVRDevice)) {
       throw new Error('Default device must be an instance of HMDVRDevice.');
     }
     this._defaultDevice = device;
@@ -74,7 +74,7 @@ WebVRPolyfillExtended.prototype = {
     if (!deviceSensor) {
       // override the native constructor to allow checks with `instanceof`
       window.PositionSensorVRDevice = PositionSensorVRDevice;
-      if (this.isMobile()) {
+      if (typeof window.orientation !== 'undefined') {
         deviceSensor = new GyroPositionSensorVRDevice();
       } else {
         deviceSensor = new MouseKeyboardPositionSensorVRDevice();
@@ -90,13 +90,6 @@ WebVRPolyfillExtended.prototype = {
    */
   isWebVRAvailable: function() {
     return ('getVRDevices' in navigator) || ('mozGetVRDevices' in navigator);
-  },
-
-  /**
-   * @returns {boolean}
-   */
-  isMobile: function() {
-    return typeof window.orientation !== 'undefined';
   }
 };
 
