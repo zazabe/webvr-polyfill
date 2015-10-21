@@ -96,8 +96,7 @@ WebVRPolyfillExtended.prototype = {
    * @returns {boolean}
    */
   isMobile: function() {
-    return /Android/i.test(navigator.userAgent) ||
-      /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    return typeof window.orientation !== 'undefined';
   }
 };
 

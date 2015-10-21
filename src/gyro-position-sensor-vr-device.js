@@ -32,7 +32,7 @@ function GyroPositionSensorVRDevice() {
   window.addEventListener('orientationchange', this.onScreenOrientationChange_.bind(this));
 
   this.deviceOrientation = null;
-  this.screenOrientation = window.screen.orientation.angle;
+  this.screenOrientation = window.orientation.angle;
 
   // Helper objects for calculating orientation.
   this.finalQuaternion = new THREE.Quaternion();
@@ -75,7 +75,7 @@ GyroPositionSensorVRDevice.prototype.onDeviceMotionChange_ =
 
 GyroPositionSensorVRDevice.prototype.onScreenOrientationChange_ =
     function(screenOrientation) {
-  this.screenOrientation = window.screen.orientation.angle;
+  this.screenOrientation = window.orientation.angle;
 };
 
 GyroPositionSensorVRDevice.prototype.getOrientation = function() {
