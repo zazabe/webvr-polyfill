@@ -1,5 +1,5 @@
-var VRFieldOfView = require('./VRFieldOfView.js');
-var DOMPoint = require('./DOMPoint.js');
+var VRFieldOfView = require('./VRFieldOfView');
+var DOMPoint = require('./DOMPoint');
 
 var VREyeParameters = function(fov, translationX){
   this._fov = new VRFieldOfView(fov);

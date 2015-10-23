@@ -1,5 +1,5 @@
-var VREyeParameters = require('./VREyeParameters.js');
-var VRDevice = require('./VRDevice.js');
+var VREyeParameters = require('./VREyeParameters');
+var VRDevice = require('./VRDevice');
 
 var HMDVRDevice = function(hardwareUnitId, deviceId, deviceName, fov, interpupillaryDistance, lensDistortionFactors){
   VRDevice.call(this, hardwareUnitId, deviceId, deviceName);

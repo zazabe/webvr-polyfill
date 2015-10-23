@@ -1,10 +1,10 @@
-var VRDevice = require('./VRDevice.js');
-var HMDVRDevice = require('./HMDVRDevice.js');
-var CardboardHMDVRDevice = require('./CardboardHMDVRDevice.js');
+var VRDevice = require('./VRDevice');
+var HMDVRDevice = require('./HMDVRDevice');
+var CardboardHMDVRDevice = require('./CardboardHMDVRDevice');
 
-var PositionSensorVRDevice = require('../base.js').PositionSensorVRDevice;
-var GyroPositionSensorVRDevice = require('../gyro-position-sensor-vr-device.js');
-var MouseKeyboardPositionSensorVRDevice = require('../mouse-keyboard-position-sensor-vr-device.js');
+var PositionSensorVRDevice = require('../src/base').PositionSensorVRDevice;
+var OrientationPositionSensorVRDevice = require('../src/orientation-position-sensor-vr-device');
+var MouseKeyboardPositionSensorVRDevice = require('../src/mouse-keyboard-position-sensor-vr-device');
 
 
 /**
@@ -75,7 +75,7 @@ WebVRPolyfillExtended.prototype = {
       // override the native constructor to allow checks with `instanceof`
       window.PositionSensorVRDevice = PositionSensorVRDevice;
       if (typeof window.orientation !== 'undefined') {
-        deviceSensor = new GyroPositionSensorVRDevice();
+        deviceSensor = new OrientationPositionSensorVRDevice();
       } else {
         deviceSensor = new MouseKeyboardPositionSensorVRDevice();
       }

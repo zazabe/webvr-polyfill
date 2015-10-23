@@ -1,4 +1,4 @@
-var HMDVRDevice = require('./HMDVRDevice.js');
+var HMDVRDevice = require('./HMDVRDevice');
 
 var DEFAULT_FOV = 96;
 var DEFAULT_INTERPUPILLARY_DISTANCE = 0.06;
