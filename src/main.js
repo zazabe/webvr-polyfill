@@ -12,13 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+var WebVRPolyfill = require('./webvr-polyfill.js');
 
-// CM: must create our own polyfill instance
-//var WebVRPolyfill = require('./webvr-polyfill.js');
-//
-// new WebVRPolyfill();
-
-
-var WebVRPolyfill = require('./cm/Polyfill.js');
-window.VR = window.VR || {};
-window.VR.webVRPolyfill = new WebVRPolyfill();
+// Initialize a WebVRConfig just in case.
+window.WebVRConfig = window.WebVRConfig || {};
+new WebVRPolyfill();
