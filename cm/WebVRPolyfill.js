@@ -4,8 +4,18 @@ var CardboardHMDVRDevice = require('./CardboardHMDVRDevice');
 
 var PositionSensorVRDevice = require('../src/base').PositionSensorVRDevice;
 var OrientationPositionSensorVRDevice = require('../src/orientation-position-sensor-vr-device');
+var FusionPositionSensorVRDevice = require('../src/fusion-position-sensor-vr-device');
 var MouseKeyboardPositionSensorVRDevice = require('../src/mouse-keyboard-position-sensor-vr-device');
 
+
+window.WebVRConfig = {
+  // Forces availability of VR mode.
+  FORCE_ENABLE_VR: false, // Default: false.
+  // Complementary filter coefficient. 0 for accelerometer, 1 for gyro.
+  K_FILTER: 0.98, // Default: 0.98.
+  // How far into the future to predict during fast motion.
+  PREDICTION_TIME_S: 0.050, // Default: 0.050s.
+};
 
 /**
  * @param {VRDevice} defaultDevice
@@ -74,15 +84,24 @@ WebVRPolyfillExtended.prototype = {
     if (!deviceSensor) {
       // override the native constructor to allow checks with `instanceof`
       window.PositionSensorVRDevice = PositionSensorVRDevice;
-      if (typeof window.orientation !== 'undefined') {
+      if (this._hasDeviceMotionSupport() && this._hasDeviceOrientationSupport()) {
+        deviceSensor = new FusionPositionSensorVRDevice();
+      } else if (this._hasDeviceOrientationSupport()) {
         deviceSensor = new OrientationPositionSensorVRDevice();
       } else {
         deviceSensor = new MouseKeyboardPositionSensorVRDevice();
       }
     }
-
     this.devices = [deviceHMDVR, deviceSensor];
     return this.devices;
+  },
+
+  _hasDeviceOrientationSupport: function() {
+    return typeof window.orientation !== 'undefined' && !!window.DeviceOrientationEvent;
+  },
+
+  _hasDeviceMotionSupport: function() {
+    return !!window.DeviceMotionEvent;
   },
 
   /**
