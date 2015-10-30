@@ -1,4 +1,4 @@
-var DOMPoint = function(x, y, z, w){
+var DOMPoint = function(x, y, z, w) {
   this.x = x;
   this.y = y;
   this.z = z;

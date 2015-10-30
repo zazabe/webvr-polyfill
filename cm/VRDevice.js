@@ -1,4 +1,4 @@
-var VRDevice = function(hardwareUnitId, deviceId, deviceName){
+var VRDevice = function(hardwareUnitId, deviceId, deviceName) {
   this.hardwareUnitId = hardwareUnitId;
   this.deviceId = deviceId;
   this.deviceName = deviceName;

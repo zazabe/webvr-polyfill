@@ -8,7 +8,7 @@ var DEFAULT_DISTORTION_FACTORS = {
 };
 
 
-var CardboardHMDVRDevice = function(){
+var CardboardHMDVRDevice = function() {
   HMDVRDevice.call(this, '1', '1', 'polyfill.cardboard', DEFAULT_FOV, DEFAULT_INTERPUPILLARY_DISTANCE, DEFAULT_DISTORTION_FACTORS);
 };
 

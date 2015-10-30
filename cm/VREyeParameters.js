@@ -1,44 +1,44 @@
 var VRFieldOfView = require('./VRFieldOfView');
 var DOMPoint = require('./DOMPoint');
 
-var VREyeParameters = function(fov, translationX){
+var VREyeParameters = function(fov, translationX) {
   this._fov = new VRFieldOfView(fov);
   this._translation = new DOMPoint(translationX, 0, 0, 0);
 };
 
 Object.defineProperties(VREyeParameters.prototype, {
   minimumFieldOfView: {
-    get: function(){
+    get: function() {
       return this._fov;
     }
   },
 
   maximumFieldOfView: {
-    get: function(){
+    get: function() {
       return this._fov;
     }
   },
 
   recommendedFieldOfView: {
-    get: function(){
+    get: function() {
       return this._fov;
     }
   },
 
   currentFieldOfView: {
-    get: function(){
+    get: function() {
       return this._fov;
     }
   },
 
   eyeTranslation: {
-    get: function(){
+    get: function() {
       return this._translation;
     }
   },
 
   renderRect: {
-    get: function(){
+    get: function() {
       throw new Error('Not implemented.');
     }
   }
