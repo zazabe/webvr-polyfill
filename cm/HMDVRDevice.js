@@ -12,7 +12,7 @@ var HMDVRDevice = function(hardwareUnitId, deviceId, deviceName, fov, interpupil
 var proto = HMDVRDevice.prototype = Object.create(VRDevice.prototype);
 
 /**
- * @param {string} whichEye left|right
+ * @param {String} whichEye left|right
  * @returns {{recommendedFieldOfView: VRFieldOfView, eyeTranslation: DOMPoint}}
  */
 proto.getEyeParameters = function(whichEye) {

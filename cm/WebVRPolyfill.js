@@ -105,7 +105,7 @@ WebVRPolyfillExtended.prototype = {
   },
 
   /**
-   * @returns {boolean}
+   * @returns {Boolean}
    */
   isWebVRAvailable: function() {
     return ('getVRDevices' in navigator) || ('mozGetVRDevices' in navigator);
