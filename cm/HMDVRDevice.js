@@ -3,8 +3,7 @@ var VRDevice = require('./VRDevice');
 
 var HMDVRDevice = function(hardwareUnitId, deviceId, deviceName, fov, interpupillaryDistance, lensDistortionFactors) {
   VRDevice.call(this, hardwareUnitId, deviceId, deviceName);
-  this._fov =
-    this._eyeTranslationLeft = new VREyeParameters(fov, interpupillaryDistance * -0.5);
+  this._eyeTranslationLeft = new VREyeParameters(fov, interpupillaryDistance * -0.5);
   this._eyeTranslationRight = new VREyeParameters(fov, interpupillaryDistance * 0.5);
   this._lensDistortionFactors = lensDistortionFactors;
 };
