@@ -22,3 +22,4 @@
 var WebVRPolyfill = require('./cm/WebVRPolyfill');
 window.VR = window.VR || {};
 window.VR.webVRPolyfill = new WebVRPolyfill();
+module.exports = window.VR.webVRPolyfill;
