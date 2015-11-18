@@ -5,7 +5,7 @@ var CardboardHMDVRDevice = require('./CardboardHMDVRDevice');
 var PositionSensorVRDevice = require('../src/base').PositionSensorVRDevice;
 var OrientationPositionSensorVRDevice = require('../src/orientation-position-sensor-vr-device');
 var FusionPositionSensorVRDevice = require('../src/fusion-position-sensor-vr-device');
-var MouseKeyboardPositionSensorVRDevice = require('../src/mouse-keyboard-position-sensor-vr-device');
+var MousePositionSensorVRDevice = require('./MousePositionSensorVRDevice');
 
 
 window.WebVRConfig = {
@@ -14,7 +14,7 @@ window.WebVRConfig = {
   // Complementary filter coefficient. 0 for accelerometer, 1 for gyro.
   K_FILTER: 0.98, // Default: 0.98.
   // How far into the future to predict during fast motion.
-  PREDICTION_TIME_S: 0.050, // Default: 0.050s.
+  PREDICTION_TIME_S: 0.050 // Default: 0.050s.
 };
 
 /**
@@ -89,7 +89,7 @@ WebVRPolyfillExtended.prototype = {
       } else if (this._hasDeviceOrientationSupport()) {
         deviceSensor = new OrientationPositionSensorVRDevice();
       } else {
-        deviceSensor = new MouseKeyboardPositionSensorVRDevice();
+        deviceSensor = new MousePositionSensorVRDevice();
       }
     }
     this.devices = [deviceHMDVR, deviceSensor];
