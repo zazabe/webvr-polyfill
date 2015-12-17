@@ -1,4 +1,4 @@
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 /*
  * Copyright 2015 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -41,7 +41,7 @@ module.exports.VRDevice = VRDevice;
 module.exports.HMDVRDevice = HMDVRDevice;
 module.exports.PositionSensorVRDevice = PositionSensorVRDevice;
 
-},{}],2:[function(require,module,exports){
+},{}],2:[function(_dereq_,module,exports){
 /*
  * Copyright 2015 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -56,58 +56,140 @@ module.exports.PositionSensorVRDevice = PositionSensorVRDevice;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-var HMDVRDevice = require('./base.js').HMDVRDevice;
+var HMDVRDevice = _dereq_('./base.js').HMDVRDevice;
 
 // Constants from vrtoolkit: https://github.com/googlesamples/cardboard-java.
-var INTERPUPILLARY_DISTANCE = 0.06;
-var DEFAULT_MAX_FOV_LEFT_RIGHT = 40;
-var DEFAULT_MAX_FOV_BOTTOM = 40;
-var DEFAULT_MAX_FOV_TOP = 40;
+var DEFAULT_INTERPUPILLARY_DISTANCE = 0.06;
+var DEFAULT_FIELD_OF_VIEW = 40;
+
+var Eye = {
+  LEFT: 'left',
+  RIGHT: 'right'
+};
 
 /**
  * The HMD itself, providing rendering parameters.
  */
 function CardboardHMDVRDevice() {
   // From com/google/vrtoolkit/cardboard/FieldOfView.java.
-  this.fov = {
-    upDegrees: DEFAULT_MAX_FOV_TOP,
-    downDegrees: DEFAULT_MAX_FOV_BOTTOM,
-    leftDegrees: DEFAULT_MAX_FOV_LEFT_RIGHT,
-    rightDegrees: DEFAULT_MAX_FOV_LEFT_RIGHT
-  };
+  this.setMonocularFieldOfView_(DEFAULT_FIELD_OF_VIEW);
   // Set display constants.
-  this.eyeTranslationLeft = {
-    x: INTERPUPILLARY_DISTANCE * -0.5,
-    y: 0,
-    z: 0
-  };
-  this.eyeTranslationRight = {
-    x: INTERPUPILLARY_DISTANCE * 0.5,
-    y: 0,
-    z: 0
-  };
+  this.setInterpupillaryDistance(DEFAULT_INTERPUPILLARY_DISTANCE);
 }
 CardboardHMDVRDevice.prototype = new HMDVRDevice();
 
 CardboardHMDVRDevice.prototype.getEyeParameters = function(whichEye) {
   var eyeTranslation;
-  if (whichEye == 'left') {
+  var fieldOfView;
+  var renderRect;
+
+  if (whichEye == Eye.LEFT) {
     eyeTranslation = this.eyeTranslationLeft;
-  } else if (whichEye == 'right') {
+    fieldOfView = this.fieldOfViewLeft;
+    renderRect = this.renderRectLeft;
+  } else if (whichEye == Eye.RIGHT) {
     eyeTranslation = this.eyeTranslationRight;
+    fieldOfView = this.fieldOfViewRight;
+    renderRect = this.renderRectRight;
   } else {
     console.error('Invalid eye provided: %s', whichEye);
     return null;
   }
   return {
-    recommendedFieldOfView: this.fov,
-    eyeTranslation: eyeTranslation
+    recommendedFieldOfView: fieldOfView,
+    eyeTranslation: eyeTranslation,
+    renderRect: renderRect
+  };
+};
+
+/**
+ * Sets the field of view for both eyes. This is according to WebVR spec:
+ *
+ * @param {FieldOfView} opt_fovLeft Field of view of the left eye.
+ * @param {FieldOfView} opt_fovRight Field of view of the right eye.
+ * @param {Number} opt_zNear The near plane.
+ * @param {Number} opt_zFar The far plane.
+ *
+ * http://mozvr.github.io/webvr-spec/webvr.html#dom-hmdvrdevice-setfieldofviewleftfov-rightfov-znear-zfar
+ */
+CardboardHMDVRDevice.prototype.setFieldOfView =
+    function(opt_fovLeft, opt_fovRight, opt_zNear, opt_zFar) {
+  if (opt_fovLeft) {
+    this.fieldOfViewLeft = opt_fovLeft;
+  }
+  if (opt_fovRight) {
+    this.fieldOfViewRight = opt_fovRight;
+  }
+  if (opt_zNear) {
+    this.zNear = opt_zNear;
+  }
+  if (opt_zFar) {
+    this.zFar = opt_zFar;
+  }
+};
+
+
+/**
+ * Changes the interpupillary distance of the rendered scene. This is useful for
+ * changing Cardboard viewers.
+ *
+ * Possibly a useful addition to the WebVR spec?
+ *
+ * @param {Number} ipd Distance between eyes.
+ */
+CardboardHMDVRDevice.prototype.setInterpupillaryDistance = function(ipd) {
+  this.eyeTranslationLeft = {
+    x: ipd * -0.5,
+    y: 0,
+    z: 0
+  };
+  this.eyeTranslationRight = {
+    x: ipd * 0.5,
+    y: 0,
+    z: 0
+  };
+};
+
+
+/**
+ * Changes the render rect (ie. viewport) where each eye is rendered. Again,
+ * useful for changing Cardboard viewers.
+ *
+ * @param {Rect} opt_rectLeft Viewport for left eye.
+ * @param {Rect} opt_rectRight Viewport for right eye.
+ */
+CardboardHMDVRDevice.prototype.setRenderRect = function(opt_rectLeft, opt_rectRight) {
+  if (opt_rectLeft) {
+    this.renderRectLeft = opt_rectLeft;
+  }
+  if (opt_rectRight) {
+    this.renderRectRight = opt_rectRight;
+  }
+};
+
+/**
+ * Sets a symmetrical field of view for both eyes, with just one angle.
+ *
+ * @param {Number} angle Angle in degrees of left, right, top and bottom for
+ * both eyes.
+ */
+CardboardHMDVRDevice.prototype.setMonocularFieldOfView_ = function(angle) {
+  this.setFieldOfView(this.createSymmetricalFieldOfView_(angle),
+                      this.createSymmetricalFieldOfView_(angle));
+};
+
+CardboardHMDVRDevice.prototype.createSymmetricalFieldOfView_ = function(angle) {
+  return {
+    upDegrees: angle,
+    downDegrees: angle,
+    leftDegrees: angle,
+    rightDegrees: angle
   };
 };
 
 module.exports = CardboardHMDVRDevice;
 
-},{"./base.js":1}],3:[function(require,module,exports){
+},{"./base.js":1}],3:[function(_dereq_,module,exports){
 /*
  * Copyright 2015 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -126,9 +208,9 @@ module.exports = CardboardHMDVRDevice;
 /**
  * TODO: Fix up all "new THREE" instantiations to improve performance.
  */
-var SensorSample = require('./sensor-sample.js');
-var THREE = require('./three-math.js');
-var Util = require('./util.js');
+var SensorSample = _dereq_('./sensor-sample.js');
+var THREE = _dereq_('./three-math.js');
+var Util = _dereq_('./util.js');
 
 var DEBUG = false;
 
@@ -275,7 +357,7 @@ ComplementaryFilter.prototype.gyroToQuaternionDelta_ = function(gyro, dt) {
 
 module.exports = ComplementaryFilter;
 
-},{"./sensor-sample.js":8,"./three-math.js":9,"./util.js":11}],4:[function(require,module,exports){
+},{"./sensor-sample.js":8,"./three-math.js":9,"./util.js":11}],4:[function(_dereq_,module,exports){
 /*
  * Copyright 2015 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -290,13 +372,13 @@ module.exports = ComplementaryFilter;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-var PositionSensorVRDevice = require('./base.js').PositionSensorVRDevice;
+var PositionSensorVRDevice = _dereq_('./base.js').PositionSensorVRDevice;
 
-var ComplementaryFilter = require('./complementary-filter.js');
-var PosePredictor = require('./pose-predictor.js');
-var TouchPanner = require('./touch-panner.js');
-var THREE = require('./three-math.js');
-var Util = require('./util.js');
+var ComplementaryFilter = _dereq_('./complementary-filter.js');
+var PosePredictor = _dereq_('./pose-predictor.js');
+var TouchPanner = _dereq_('./touch-panner.js');
+var THREE = _dereq_('./three-math.js');
+var Util = _dereq_('./util.js');
 
 /**
  * The positional sensor, implemented using DeviceMotion APIs.
@@ -312,7 +394,7 @@ function FusionPositionSensorVRDevice() {
   window.addEventListener('orientationchange', this.onScreenOrientationChange_.bind(this));
 
   this.filter = new ComplementaryFilter(WebVRConfig.K_FILTER || 0.98);
-  this.posePredictor = new PosePredictor(WebVRConfig.PREDICTION_TIME_S || 0.050);
+  this.posePredictor = new PosePredictor(WebVRConfig.PREDICTION_TIME_S || 0.040);
   this.touchPanner = new TouchPanner();
 
   this.filterToWorldQ = new THREE.Quaternion();
@@ -329,6 +411,9 @@ function FusionPositionSensorVRDevice() {
 
   // Keep track of a reset transform for resetSensor.
   this.resetQ = new THREE.Quaternion();
+
+  this.isFirefoxAndroid = Util.isFirefoxAndroid();
+  this.isIOS = Util.isIOS();
 }
 FusionPositionSensorVRDevice.prototype = new PositionSensorVRDevice();
 
@@ -357,9 +442,19 @@ FusionPositionSensorVRDevice.prototype.getOrientation = function() {
   var out = new THREE.Quaternion();
   out.copy(this.filterToWorldQ);
   out.multiply(this.resetQ);
-  out.multiply(this.touchPanner.getOrientation());
+  if (!WebVRConfig.TOUCH_PANNER_DISABLED) {
+    out.multiply(this.touchPanner.getOrientation());
+  }
   out.multiply(this.predictedQ);
   out.multiply(this.worldToScreenQ);
+
+  // Handle the yaw-only case.
+  if (WebVRConfig.YAW_ONLY) {
+    // Make a quaternion that only turns around the Y-axis.
+    out.x = 0;
+    out.z = 0;
+    out.normalize();
+  }
   return out;
 };
 
@@ -369,13 +464,20 @@ FusionPositionSensorVRDevice.prototype.resetSensor = function() {
   var yaw = euler.y;
   console.log('resetSensor with yaw: %f', yaw);
   this.resetQ.setFromAxisAngle(new THREE.Vector3(0, 0, 1), -yaw);
-  this.touchPanner.resetSensor();
+  if (!WebVRConfig.TOUCH_PANNER_DISABLED) {
+    this.touchPanner.resetSensor();
+  }
 };
 
 FusionPositionSensorVRDevice.prototype.onDeviceMotionChange_ = function(deviceMotion) {
   var accGravity = deviceMotion.accelerationIncludingGravity;
   var rotRate = deviceMotion.rotationRate;
   var timestampS = deviceMotion.timeStamp / 1000;
+
+  // Firefox Android timeStamp returns one thousandth of a millisecond.
+  if (this.isFirefoxAndroid) {
+    timestampS /= 1000;
+  }
 
   var deltaS = timestampS - this.previousTimestampS;
   if (deltaS <= Util.MIN_TIMESTEP || deltaS > Util.MAX_TIMESTEP) {
@@ -387,9 +489,9 @@ FusionPositionSensorVRDevice.prototype.onDeviceMotionChange_ = function(deviceMo
   this.accelerometer.set(-accGravity.x, -accGravity.y, -accGravity.z);
   this.gyroscope.set(rotRate.alpha, rotRate.beta, rotRate.gamma);
 
-  // In iOS, rotationRate is reported in degrees, so we first convert to
-  // radians.
-  if (Util.isIOS()) {
+  // With iOS and Firefox Android, rotationRate is reported in degrees,
+  // so we first convert to radians.
+  if (this.isIOS || this.isFirefoxAndroid) {
     this.gyroscope.multiplyScalar(Math.PI / 180);
   }
 
@@ -412,7 +514,7 @@ FusionPositionSensorVRDevice.prototype.setScreenTransform_ = function() {
     case 90:
       this.worldToScreenQ.setFromAxisAngle(new THREE.Vector3(0, 0, 1), -Math.PI/2);
       break;
-    case -90: 
+    case -90:
       this.worldToScreenQ.setFromAxisAngle(new THREE.Vector3(0, 0, 1), Math.PI/2);
       break;
     case 180:
@@ -424,7 +526,7 @@ FusionPositionSensorVRDevice.prototype.setScreenTransform_ = function() {
 
 module.exports = FusionPositionSensorVRDevice;
 
-},{"./base.js":1,"./complementary-filter.js":3,"./pose-predictor.js":7,"./three-math.js":9,"./touch-panner.js":10,"./util.js":11}],5:[function(require,module,exports){
+},{"./base.js":1,"./complementary-filter.js":3,"./pose-predictor.js":7,"./three-math.js":9,"./touch-panner.js":10,"./util.js":11}],5:[function(_dereq_,module,exports){
 /*
  * Copyright 2015 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -439,13 +541,13 @@ module.exports = FusionPositionSensorVRDevice;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-var WebVRPolyfill = require('./webvr-polyfill.js');
+var WebVRPolyfill = _dereq_('./webvr-polyfill.js');
 
 // Initialize a WebVRConfig just in case.
 window.WebVRConfig = window.WebVRConfig || {};
 new WebVRPolyfill();
 
-},{"./webvr-polyfill.js":12}],6:[function(require,module,exports){
+},{"./webvr-polyfill.js":12}],6:[function(_dereq_,module,exports){
 /*
  * Copyright 2015 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -460,9 +562,9 @@ new WebVRPolyfill();
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-var PositionSensorVRDevice = require('./base.js').PositionSensorVRDevice;
-var THREE = require('./three-math.js');
-var Util = require('./util.js');
+var PositionSensorVRDevice = _dereq_('./base.js').PositionSensorVRDevice;
+var THREE = _dereq_('./three-math.js');
+var Util = _dereq_('./util.js');
 
 // How much to rotate per key stroke.
 var KEY_SPEED = 0.15;
@@ -615,7 +717,7 @@ MouseKeyboardPositionSensorVRDevice.prototype.resetSensor = function() {
 
 module.exports = MouseKeyboardPositionSensorVRDevice;
 
-},{"./base.js":1,"./three-math.js":9,"./util.js":11}],7:[function(require,module,exports){
+},{"./base.js":1,"./three-math.js":9,"./util.js":11}],7:[function(_dereq_,module,exports){
 /*
  * Copyright 2015 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -630,7 +732,7 @@ module.exports = MouseKeyboardPositionSensorVRDevice;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-var THREE = require('./three-math.js');
+var THREE = _dereq_('./three-math.js');
 
 var DEBUG = false;
 
@@ -698,7 +800,7 @@ PosePredictor.prototype.getPrediction = function(currentQ, gyro, timestampS) {
 
 module.exports = PosePredictor;
 
-},{"./three-math.js":9}],8:[function(require,module,exports){
+},{"./three-math.js":9}],8:[function(_dereq_,module,exports){
 function SensorSample(sample, timestampS) {
   this.set(sample, timestampS);
 };
@@ -714,7 +816,7 @@ SensorSample.prototype.copy = function(sensorSample) {
 
 module.exports = SensorSample;
 
-},{}],9:[function(require,module,exports){
+},{}],9:[function(_dereq_,module,exports){
 /*
  * A subset of THREE.js, providing mostly quaternion and euler-related
  * operations, manually lifted from
@@ -3009,7 +3111,7 @@ THREE.Math = {
 
 module.exports = THREE;
 
-},{}],10:[function(require,module,exports){
+},{}],10:[function(_dereq_,module,exports){
 /*
  * Copyright 2015 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -3024,7 +3126,8 @@ module.exports = THREE;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-var THREE = require('./three-math.js');
+var THREE = _dereq_('./three-math.js');
+var Util = _dereq_('./util.js');
 
 var ROTATE_SPEED = 0.5;
 /**
@@ -3071,6 +3174,11 @@ TouchPanner.prototype.onTouchMove_ = function(e) {
   this.rotateDelta.subVectors(this.rotateEnd, this.rotateStart);
   this.rotateStart.copy(this.rotateEnd);
 
+  // On iOS, direction is inverted.
+  if (Util.isIOS()) {
+    this.rotateDelta.x *= -1;
+  }
+
   var element = document.body;
   this.theta += 2 * Math.PI * this.rotateDelta.x / element.clientWidth * ROTATE_SPEED;
 };
@@ -3081,7 +3189,7 @@ TouchPanner.prototype.onTouchEnd_ = function(e) {
 
 module.exports = TouchPanner;
 
-},{"./three-math.js":9}],11:[function(require,module,exports){
+},{"./three-math.js":9,"./util.js":11}],11:[function(_dereq_,module,exports){
 /*
  * Copyright 2015 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -3109,6 +3217,10 @@ Util.isIOS = function() {
   return /iPad|iPhone|iPod/.test(navigator.platform);
 };
 
+Util.isFirefoxAndroid = function() {
+  return navigator.userAgent.indexOf('Firefox') !== -1 && navigator.userAgent.indexOf('Android') !== -1;
+}
+
 // Helper method to validate the time steps of sensor timestamps.
 Util.isTimestampDeltaValid = function(timestampDeltaS) {
   if (isNaN(timestampDeltaS)) {
@@ -3125,7 +3237,7 @@ Util.isTimestampDeltaValid = function(timestampDeltaS) {
 
 module.exports = Util;
 
-},{}],12:[function(require,module,exports){
+},{}],12:[function(_dereq_,module,exports){
 /*
  * Copyright 2015 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -3141,14 +3253,14 @@ module.exports = Util;
  * limitations under the License.
  */
 
-var CardboardHMDVRDevice = require('./cardboard-hmd-vr-device.js');
+var CardboardHMDVRDevice = _dereq_('./cardboard-hmd-vr-device.js');
 //var OrientationPositionSensorVRDevice = require('./orientation-position-sensor-vr-device.js');
-var FusionPositionSensorVRDevice = require('./fusion-position-sensor-vr-device.js');
-var MouseKeyboardPositionSensorVRDevice = require('./mouse-keyboard-position-sensor-vr-device.js');
+var FusionPositionSensorVRDevice = _dereq_('./fusion-position-sensor-vr-device.js');
+var MouseKeyboardPositionSensorVRDevice = _dereq_('./mouse-keyboard-position-sensor-vr-device.js');
 // Uncomment to add positional tracking via webcam.
 //var WebcamPositionSensorVRDevice = require('./webcam-position-sensor-vr-device.js');
-var HMDVRDevice = require('./base.js').HMDVRDevice;
-var PositionSensorVRDevice = require('./base.js').PositionSensorVRDevice;
+var HMDVRDevice = _dereq_('./base.js').HMDVRDevice;
+var PositionSensorVRDevice = _dereq_('./base.js').PositionSensorVRDevice;
 
 function WebVRPolyfill() {
   this.devices = [];
@@ -3174,7 +3286,9 @@ WebVRPolyfill.prototype.enablePolyfill = function() {
     //this.devices.push(new OrientationPositionSensorVRDevice());
     this.devices.push(new FusionPositionSensorVRDevice());
   } else {
-    this.devices.push(new MouseKeyboardPositionSensorVRDevice());
+    if (!WebVRConfig.MOUSE_KEYBOARD_CONTROLS_DISABLED) {
+      this.devices.push(new MouseKeyboardPositionSensorVRDevice());
+    }
     // Uncomment to add positional tracking via webcam.
     //this.devices.push(new WebcamPositionSensorVRDevice());
   }
