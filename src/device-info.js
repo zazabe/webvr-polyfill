@@ -52,8 +52,8 @@ var DEFAULT_RIGHT_CENTER = {x: 0.5, y: 0.5};
  * obtained from dpdb.getDeviceParams()). Can be null to mean no device
  * params were found.
  */
-function DeviceInfo(deviceParams) {
-  this.viewer = new CardboardViewer(WebVRConfig.DEVICE_VIEWER);
+function DeviceInfo(deviceParams, viewer) {
+  this.viewer = viewer;
   this.updateDeviceParams(deviceParams);
   this.distortion = new Distortion(this.viewer.distortionCoefficients);
 }
@@ -284,28 +284,5 @@ DeviceInfo.prototype.getUndistortedParams_ = function() {
   };
 };
 
-
-function CardboardViewer(params) {
-  // A machine readable ID.
-  this.id = params.id;
-  // A human readable label.
-  this.label = params.label;
-
-  // Field of view in degrees (per side).
-  this.fov = params.fov;
-
-  // Distance between lens centers in meters.
-  this.interLensDistance = params.interLensDistance;
-  // Distance between viewer baseline and lens center in meters.
-  this.baselineLensDistance = params.baselineLensDistance;
-  // Screen-to-lens distance in meters.
-  this.screenLensDistance = params.screenLensDistance;
-
-  // Distortion coefficients.
-  this.distortionCoefficients = params.distortionCoefficients;
-  // Inverse distortion coefficients.
-  // TODO: Calculate these from distortionCoefficients in the future.
-  this.inverseCoefficients = params.inverseCoefficients;
-}
 
 module.exports = DeviceInfo;

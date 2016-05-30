@@ -14,7 +14,6 @@
  */
 var Util = require('./util.js');
 var WebVRPolyfill = require('./webvr-polyfill.js');
-var Viewers = require('./device-viewers.js');
 
 // Initialize a WebVRConfig just in case.
 window.WebVRConfig = Util.extend({
@@ -66,8 +65,9 @@ window.WebVRConfig = Util.extend({
   // and gl.TEXTURE_BINDING_2D for texture unit 0.
   DIRTY_SUBMIT_FRAME_BINDINGS: false,
 
-  // Configure the headset
-  DEVICE_VIEWER: Viewers.CardboardV2
+  // Configure the default viewer
+  CARDBOARD_DEFAULT_VIEWER: 'CardboardV2'
+
 }, window.WebVRConfig);
 
 if (!window.WebVRConfig.DEFER_INITIALIZATION) {
