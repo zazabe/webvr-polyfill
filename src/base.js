@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+var Promise = require('es6-promise').Promise;
 var Util = require('./util.js');
 var WakeLock = require('./wakelock.js');
 

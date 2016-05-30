@@ -14,7 +14,7 @@
  */
 
 // Polyfill ES6 Promises (mostly for IE 11).
-require('es6-promise').polyfill();
+var Promise = require('es6-promise').Promise;
 
 var CardboardVRDisplay = require('./cardboard-vr-display.js');
 var MouseKeyboardVRDisplay = require('./mouse-keyboard-vr-display.js');
