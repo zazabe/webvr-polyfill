@@ -66,7 +66,11 @@ window.WebVRConfig = Util.extend({
   DIRTY_SUBMIT_FRAME_BINDINGS: false,
 
   // Enable the fetch of the online version of the DPDB
-  DPDB_FETCH_ONLINE: true
+  DPDB_FETCH_ONLINE: true,
+
+  // Configure the default viewer
+  CARDBOARD_DEFAULT_VIEWER: 'CardboardV2'
+
 }, window.WebVRConfig);
 
 if (!window.WebVRConfig.DEFER_INITIALIZATION) {

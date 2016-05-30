@@ -15,6 +15,7 @@
 
 var CardboardDistorter = require('./cardboard-distorter.js');
 var CardboardUI = require('./cardboard-ui.js');
+var CardboardViewers = require('./cardboard-viewers.js');
 var DeviceInfo = require('./device-info.js');
 var Dpdb = require('./dpdb/dpdb.js');
 var FusionPoseSensor = require('./sensor-fusion/fusion-pose-sensor.js');
@@ -43,14 +44,12 @@ function CardboardVRDisplay() {
   this.distorter_ = null;
   this.cardboardUI_ = null;
 
+  this.viewers_ = new CardboardViewers();
   this.dpdb_ = new Dpdb(WebVRConfig.DPDB_FETCH_ONLINE, this.onDeviceParamsUpdated_.bind(this));
-  this.deviceInfo_ = new DeviceInfo(this.dpdb_.getDeviceParams());
+  this.deviceInfo_ = new DeviceInfo(this.dpdb_.getDeviceParams(), this.viewers_.getCurrentViewer());
+  this.viewers_.on('select', this.onViewerChanged_.bind(this));
 
-  this.viewerSelector_ = new ViewerSelector();
-  this.viewerSelector_.on('change', this.onViewerChanged_.bind(this));
-
-  // Set the correct initial viewer.
-  this.deviceInfo_.setViewer(this.viewerSelector_.getCurrentViewer());
+  this.viewerSelector_ = new ViewerSelector(this.viewers_);
 
   if (!WebVRConfig.ROTATE_INSTRUCTIONS_DISABLED) {
     this.rotateInstructions_ = new RotateInstructions();

@@ -15,26 +15,19 @@
 
 var Emitter = require('./emitter.js');
 var Util = require('./util.js');
-var DeviceInfo = require('./device-info.js');
 
-var DEFAULT_VIEWER = 'CardboardV1';
-var VIEWER_KEY = 'WEBVR_CARDBOARD_VIEWER';
 var CLASS_NAME = 'webvr-polyfill-viewer-selector';
 
 /**
  * Creates a viewer selector with the options specified. Supports being shown
- * and hidden. Generates events when viewer parameters change. Also supports
- * saving the currently selected index in localStorage.
+ * and hidden.
  */
-function ViewerSelector() {
-  // Try to load the selected key from local storage. If none exists, use the
-  // default key.
-  try {
-    this.selectedKey = localStorage.getItem(VIEWER_KEY) || DEFAULT_VIEWER;
-  } catch (error) {
-    console.error('Failed to load viewer profile: %s', error);
-  }
-  this.dialog = this.createDialog_(DeviceInfo.Viewers);
+function ViewerSelector(viewers) {
+  viewers.on('add', this.updateDialog_.bind(this));
+  viewers.on('remove', this.updateDialog_.bind(this));
+  this.updateDialog_();
+
+  this.viewers = viewers;
   this.root = null;
 }
 ViewerSelector.prototype = new Emitter();
@@ -61,10 +54,6 @@ ViewerSelector.prototype.hide = function() {
   this.dialog.style.display = 'none';
 };
 
-ViewerSelector.prototype.getCurrentViewer = function() {
-  return DeviceInfo.Viewers[this.selectedKey];
-};
-
 ViewerSelector.prototype.getSelectedKey_ = function() {
   var input = this.dialog.querySelector('input[name=field]:checked');
   if (input) {
@@ -75,12 +64,12 @@ ViewerSelector.prototype.getSelectedKey_ = function() {
 
 ViewerSelector.prototype.onSave_ = function() {
   this.selectedKey = this.getSelectedKey_();
-  if (!this.selectedKey || !DeviceInfo.Viewers[this.selectedKey]) {
+  if (!this.selectedKey) {
     console.error('ViewerSelector.onSave_: this should never happen!');
     return;
   }
 
-  this.emit('change', DeviceInfo.Viewers[this.selectedKey]);
+  this.viewers.select(this.selectedKey);
 
   // Attempt to save the viewer profile, but fails in private mode.
   try {
@@ -94,7 +83,7 @@ ViewerSelector.prototype.onSave_ = function() {
 /**
  * Creates the dialog.
  */
-ViewerSelector.prototype.createDialog_ = function(options) {
+ViewerSelector.prototype.createDialog_ = function() {
   var container = document.createElement('div');
   container.classList.add(CLASS_NAME);
   container.style.display = 'none';
@@ -126,11 +115,12 @@ ViewerSelector.prototype.createDialog_ = function(options) {
   s.boxShadow = '0px 5px 20px #666';
 
   dialog.appendChild(this.createH1_('Select your viewer'));
-  for (var id in options) {
-    dialog.appendChild(this.createChoice_(id, options[id].label));
-  }
-  dialog.appendChild(this.createButton_('Save', this.onSave_.bind(this)));
 
+  this.viewers.each(function(name, viewer) {
+    dialog.appendChild(this.createChoice_(name, viewer.label));
+  }, this);
+
+  dialog.appendChild(this.createButton_('Save', this.onSave_.bind(this)));
   container.appendChild(overlay);
   container.appendChild(dialog);
 
@@ -195,5 +185,10 @@ ViewerSelector.prototype.createButton_ = function(label, onclick) {
 
   return button;
 };
+
+
+ViewerSelector.prototype.updateDialog_ = function() {
+  this.dialog = this.createDialog_();
+}
 
 module.exports = ViewerSelector;
