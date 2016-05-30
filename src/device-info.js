@@ -82,7 +82,7 @@ var DEFAULT_RIGHT_CENTER = {x: 0.5, y: 0.5};
  * params were found.
  */
 function DeviceInfo(deviceParams) {
-  this.viewer = Viewers.CardboardV2;
+  this.viewer = WebVRConfig.DEVICE_VIEWER;
   this.updateDeviceParams(deviceParams);
   this.distortion = new Distortion(this.viewer.distortionCoefficients);
 }
